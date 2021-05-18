@@ -183,7 +183,8 @@ contract ArtichainPresale is Ownable {
      * @return Whether presale is updated
      */
     function setPresale(uint256 _stage, uint256 _cap, uint256 _rate, uint256 _bonus) public onlyOwner returns (bool) {
-        require(currentPresaleStage < _stage && _stage <= 3, "Cannot change params for current stage");
+        require(_stage > 0 && _stage <= 3, "Invalid stage");
+        require(!(currentPresaleStage == _stage && startBlock <= block.number), "Cannot change params for current stage");
         require(_cap > 0 && _rate > 0);
 
         presaleStages[_stage].cap = _cap;
@@ -354,7 +355,7 @@ contract ArtichainPresale is Ownable {
             currentCap = currentCap.add(presaleStages[i].cap);
         }
 
-        if(currentCap * 10**(uint256(token.decimals())) <= totalSoldAmount) {
+        if(currentCap <= totalSoldAmount) {
             currentPresaleStage++;
             if(currentPresaleStage <= 3) {
                 rate = presaleStages[currentPresaleStage].rate;

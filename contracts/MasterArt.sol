@@ -7,7 +7,7 @@ import '@pancakeswap/pancake-swap-lib/contracts/token/BEP20/SafeBEP20.sol';
 import '@pancakeswap/pancake-swap-lib/contracts/access/Ownable.sol';
 
 import "./ArtichainToken.sol";
-interface IMigratorChef {
+interface IMigratorArt {
     // Perform LP token migration from legacy PancakeSwap to ArtichainSwap.
     // Take the current LP token address and return the new LP token address.
     // Migrator should have full access to the caller's LP token.
@@ -73,7 +73,7 @@ contract MasterArt is Ownable {
     // Bonus muliplier for early ait makers.
     uint256 public BONUS_MULTIPLIER = 1;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
-    IMigratorChef public migrator;
+    IMigratorArt public migrator;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -177,7 +177,7 @@ contract MasterArt is Ownable {
     }
 
     // Set the migrator contract. Can only be called by the owner.
-    function setMigrator(IMigratorChef _migrator) public onlyOwner {
+    function setMigrator(IMigratorArt _migrator) public onlyOwner {
         migrator = _migrator;
     }
 
@@ -239,16 +239,20 @@ contract MasterArt is Ownable {
         uint256 aitReward = 0;
         uint256 lastBlock = pool.lastRewardBlock;
         for(uint i = 0; i < 3; i++) {
+            if(pool.lastRewardBlock > rewardInfo[i].lastBlock) continue;
+
             if(block.number <= rewardInfo[i].lastBlock) {
                 uint256 multiplier = getMultiplier(lastBlock, block.number);
                 uint256 _reward = multiplier.mul(rewardInfo[i].reward);
                 aitReward = aitReward.add(_reward);
+
+                break;
             } else {
                 uint256 multiplier = getMultiplier(lastBlock, rewardInfo[i].lastBlock);
                 uint256 _reward = multiplier.mul(rewardInfo[i].reward);
                 aitReward = aitReward.add(_reward);
             }
-            lastBlock = rewardInfo[i].lastBlock.add(1);
+            lastBlock = rewardInfo[i].lastBlock;
         }
 
         return aitReward.mul(pool.allocPoint).div(totalAllocPoint);
