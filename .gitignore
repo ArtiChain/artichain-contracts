@@ -11,4 +11,3 @@ artifacts
 coverage
 coverage.json
 
-package-lock.json
