@@ -217,10 +217,11 @@ contract MasterArt is Ownable {
     // third year reward: 1000 
     function setRewardInfo() internal {
         if(rewardInfo.length == 0) {
-            uint256 perBlockReward = uint256(3 * (4000 * 1e18)).div(365 days);
-            for(uint i = 0; i < 3; i ++) {
+            uint256 supply = 4000;
+            for(uint i = 0; i < 3; i++) {
+                uint256 perBlockReward = supply.mul(3 * 1e18).mul(100).div(101).div(365 days);
                 rewardInfo.push(BlockRewardInfo({firstBlock: 0, lastBlock: 0, reward: perBlockReward}));
-                perBlockReward = perBlockReward.div(2);
+                supply = supply.div(2);
             }
         }
 
@@ -293,7 +294,7 @@ contract MasterArt is Ownable {
         }
         uint256 aitReward = calcPoolReward(_pid);
 
-        // ait.mint(devAddr, aitReward.div(10));
+        ait.mint(devAddr, aitReward.div(100)); // 1% is dev reward
         ait.mint(address(this), aitReward);
         pool.accAitPerShare = pool.accAitPerShare.add(aitReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
