@@ -264,7 +264,7 @@ contract ArtichainEscrow is Ownable {
         }
     }
 
-    function balanceOf(address _address) public view onlyOwner returns (uint256, uint256, uint256) {
+    function balanceOf(address _address) public view returns (uint256, uint256, uint256) {
         uint256 available = 0;
         if(balances[_address] != 0) {
             available = balances[_address];
@@ -273,10 +273,6 @@ contract ArtichainEscrow is Ownable {
         uint256 locked = 0;
         if(lockedBalances[_address] != 0) {
             locked = lockedBalances[_address];
-        }
-
-        if(lockedPayments[_address].length == 0) {
-            return (available, locked, 0);
         }
 
         for(uint i = 0; i < lockedPayments[_address].length; i++) {
@@ -305,10 +301,6 @@ contract ArtichainEscrow is Ownable {
         uint256 locked = 0;
         if(lockedBalances[msg.sender] != 0) {
             locked = lockedBalances[msg.sender];
-        }
-
-        if(lockedPayments[msg.sender].length == 0) {
-            return (available, locked, 0);
         }
 
         for(uint i = 0; i < lockedPayments[msg.sender].length; i++) {
