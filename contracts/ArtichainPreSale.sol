@@ -120,11 +120,11 @@ contract ArtichainPresale is Ownable {
         endBlock = _startBlock + (4 * 7 days) / 3; // 4 weeks
 
         // 10k tokens for presale + bonus 350
-        cap = 10350 * (10**uint256(token.decimals()));
+        cap = 10350 * (10**uint(token.decimals()));
 
-        presaleStages[1] = PresaleStage(1, 4000 * (10**uint256(token.decimals())), 5000, 500);
-        presaleStages[2] = PresaleStage(2, 3000 * (10**uint256(token.decimals())), 6000, 300);
-        presaleStages[3] = PresaleStage(3, 3000 * (10**uint256(token.decimals())), 7000, 200);
+        presaleStages[1] = PresaleStage(1, 4000 * (10**uint(token.decimals())), 5000, 500);
+        presaleStages[2] = PresaleStage(2, 3000 * (10**uint(token.decimals())), 6000, 300);
+        presaleStages[3] = PresaleStage(3, 3000 * (10**uint(token.decimals())), 7000, 200);
 
         rate = 5000;
         currentPresaleStage = 1;
@@ -157,7 +157,7 @@ contract ArtichainPresale is Ownable {
      * @dev Checks whether the period in which the Presale is open has already elapsed.
      * @return Whether Presale period has elapsed
      */
-    function hasClosed() public view returns (bool) {
+    function hasClosed() external view returns (bool) {
         // solium-disable-next-line security/no-block-members
         return capReached() || block.number > endBlock;
     }
@@ -166,7 +166,7 @@ contract ArtichainPresale is Ownable {
      * @dev Start presale.
      * @return Whether presale is started
      */
-    function startPresale() public onlyOwner returns (bool) {
+    function startPresale() external onlyOwner returns (bool) {
         require(startBlock > block.number, "Presale is already started");
 
         currentPresaleStage = 1;
@@ -183,7 +183,7 @@ contract ArtichainPresale is Ownable {
      * @dev update presale params.
      * @return Whether presale is updated
      */
-    function setPresale(uint256 _stage, uint256 _cap, uint256 _rate, uint256 _bonus) public onlyOwner returns (bool) {
+    function setPresale(uint256 _stage, uint256 _cap, uint256 _rate, uint256 _bonus) external onlyOwner returns (bool) {
         require(_stage > 0 && _stage <= 3, "Invalid stage");
         require(!(currentPresaleStage == _stage && startBlock <= block.number), "Cannot change params for current stage");
         require(_cap > 0 && _rate > 0);
@@ -199,7 +199,7 @@ contract ArtichainPresale is Ownable {
      * @dev Finish presale.
      * @return Whether presale is finished
      */
-    function finishPresale() public onlyOwner returns (bool) {
+    function finishPresale() external onlyOwner returns (bool) {
         require(startBlock <= block.number, "Presale is not started");
         require(currentPresaleStage < 5 , "Presale was finished");
         
@@ -214,7 +214,7 @@ contract ArtichainPresale is Ownable {
      * @return User contribution so far
      */
     function getUserContribution(address _beneficiary)
-        public
+        external
         view
         returns (uint256)
     {
@@ -222,18 +222,10 @@ contract ArtichainPresale is Ownable {
     }
 
     /**
-     * @dev Check the parameters of current presale stage.
-     * @return PresaleStage params
-     */
-    function currentStage() public view onlyWhileOpen returns (uint256) {
-        return currentPresaleStage;
-    }
-
-    /**
      * @dev Returns if exchange rate was set by a sepecific user.
      * @param _rate exchange rate for current presale stage
      */
-    function setExchangeRate(uint256 _rate) public onlyWhileOpen onlyOwner returns (bool) {
+    function setExchangeRate(uint256 _rate) external onlyWhileOpen onlyOwner returns (bool) {
         require(_rate >= 5000, "rate should be greater than 5000"); // 50 busd
 
         presaleStages[currentPresaleStage].rate = _rate;
@@ -243,7 +235,7 @@ contract ArtichainPresale is Ownable {
         return true;
     }
 
-    function updateCompanyWallet(address _wallet) public onlyWhileOpen onlyOwner returns (bool){
+    function updateCompanyWallet(address _wallet) external onlyWhileOpen onlyOwner returns (bool){
         wallet = _wallet;
         return true;
     }
@@ -252,7 +244,7 @@ contract ArtichainPresale is Ownable {
      * @dev low level token purchase ***DO NOT OVERRIDE***
      * @param busdAmount purchased busd amount
      */
-    function buyTokens(uint256 busdAmount) public {
+    function buyTokens(uint256 busdAmount) external {
         _preValidatePurchase(msg.sender, busdAmount);
 
         // calculate token amount to be created
@@ -291,7 +283,7 @@ contract ArtichainPresale is Ownable {
 
         // calculate token amount to be created
         uint256 tokens = _getTokenAmount(_busdAmount);
-        require(tokens >= 10**(uint256(token.decimals())), "AIT amount must exceed 1");
+        require(tokens >= 10**uint(token.decimals()), "AIT amount must exceed 1");
 
         contributions[_beneficiary] = contributions[_beneficiary].add(_busdAmount);
         
@@ -378,7 +370,7 @@ contract ArtichainPresale is Ownable {
         view
         returns (uint256)
     {
-        return _busdAmount.mul(10**(uint256(token.decimals() - tokenBUSD.decimals()))).mul(100).div(rate);
+        return _busdAmount.mul(10**uint(token.decimals() - tokenBUSD.decimals())).mul(100).div(rate);
     }
 
     /**
@@ -403,7 +395,7 @@ contract ArtichainPresale is Ownable {
         emit PresaleFinished();
     }
 
-    function transferTokenOwner(address _owner) public onlyOwner {
+    function transferTokenOwner(address _owner) external onlyOwner {
         token.transferOwnership(_owner);
     }
 }

@@ -1,3 +1,6 @@
+/**
+ * please use this script when ArtichainEscrow contract is upgradable contract
+ **/ 
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 const ArtichainEscrow = artifacts.require('ArtichainEscrow');
 const isUpgrade = false;

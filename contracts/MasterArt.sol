@@ -117,7 +117,7 @@ contract MasterArt is Ownable {
         totalAllocPoint = 1000;
     }
 
-    function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
+    function updateMultiplier(uint256 multiplierNumber) external onlyOwner {
         BONUS_MULTIPLIER = multiplierNumber;
     }
 
@@ -127,7 +127,7 @@ contract MasterArt is Ownable {
 
     // Add a new lp to the pool. Can only be called by the owner.
     // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-    function add(uint256 _allocPoint, IBEP20 _lpToken, uint16 _depositFee, bool _withUpdate) public onlyOwner {
+    function add(uint256 _allocPoint, IBEP20 _lpToken, uint16 _depositFee, bool _withUpdate) external onlyOwner {
         require(_depositFee <= 10000, "set: invalid deposit fee basis points");
 
         if (_withUpdate) {
@@ -148,7 +148,7 @@ contract MasterArt is Ownable {
     }
 
     // Update the given pool's AIT allocation point and deposit fee. Can only be called by the owner.
-    function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFee, bool _withUpdate) public onlyOwner {
+    function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFee, bool _withUpdate) external onlyOwner {
         require(_depositFee <= 10000, "set: invalid deposit fee basis points");
 
         if (_withUpdate) {
@@ -177,21 +177,21 @@ contract MasterArt is Ownable {
     }
 
     // Set the migrator contract. Can only be called by the owner.
-    function setMigrator(IMigratorArt _migrator) public onlyOwner {
-        migrator = _migrator;
-    }
+    // function setMigrator(IMigratorArt _migrator) external onlyOwner {
+    //     migrator = _migrator;
+    // }
 
     // Migrate lp token to another lp contract. Can be called by anyone. We trust that migrator contract is good.
-    function migrate(uint256 _pid) public {
-        require(address(migrator) != address(0), "migrate: no migrator");
-        PoolInfo storage pool = poolInfo[_pid];
-        IBEP20 lpToken = pool.lpToken;
-        uint256 bal = lpToken.balanceOf(address(this));
-        lpToken.safeApprove(address(migrator), bal);
-        IBEP20 newLpToken = migrator.migrate(lpToken);
-        require(bal == newLpToken.balanceOf(address(this)), "migrate: bad");
-        pool.lpToken = newLpToken;
-    }
+    // function migrate(uint256 _pid) external {
+    //     require(address(migrator) != address(0), "migrate: no migrator");
+    //     PoolInfo storage pool = poolInfo[_pid];
+    //     IBEP20 lpToken = pool.lpToken;
+    //     uint256 bal = lpToken.balanceOf(address(this));
+    //     lpToken.safeApprove(address(migrator), bal);
+    //     IBEP20 newLpToken = migrator.migrate(lpToken);
+    //     require(bal == newLpToken.balanceOf(address(this)), "migrate: bad");
+    //     pool.lpToken = newLpToken;
+    // }
 
     // Return reward multiplier over the given _from to _to block.
     function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
@@ -199,7 +199,7 @@ contract MasterArt is Ownable {
     }
 
     // Returns reward for each block
-    function getBlockReward() public view returns (uint256) {
+    function getBlockReward() external view returns (uint256) {
         if(block.number < startBlock) return 0;
 
         for(uint i = 0; i < 3; i++) {
@@ -301,7 +301,7 @@ contract MasterArt is Ownable {
     }
 
     // Deposit LP tokens to MasterArt for AIT allocation.
-    function deposit(uint256 _pid, uint256 _amount) public {
+    function deposit(uint256 _pid, uint256 _amount) external {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -326,7 +326,7 @@ contract MasterArt is Ownable {
     }
 
     // Withdraw LP tokens from MasterArt.
-    function withdraw(uint256 _pid, uint256 _amount) public {
+    function withdraw(uint256 _pid, uint256 _amount) external {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
@@ -345,7 +345,7 @@ contract MasterArt is Ownable {
     }
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
-    function emergencyWithdraw(uint256 _pid) public {
+    function emergencyWithdraw(uint256 _pid) external {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         pool.lpToken.safeTransfer(address(msg.sender), user.amount);
@@ -367,7 +367,7 @@ contract MasterArt is Ownable {
     }
 
     // Update dev address by the previous dev.
-    function dev(address _devAddr) public {
+    function dev(address _devAddr) external {
         require(msg.sender == devAddr, "dev: wut?");
         devAddr = _devAddr;
 
@@ -375,14 +375,14 @@ contract MasterArt is Ownable {
     }
     
     // Update fee address by the previous fee manager.
-    function setFeeAddress(address _feeAddr) public {
+    function setFeeAddress(address _feeAddr) external {
         require(msg.sender == feeAddr, "setFeeAddress: Forbidden");
         feeAddr = _feeAddr;
 
         emit SetFeeAddress(msg.sender, _feeAddr);
     }
 
-    function updateStartBlock(uint256 _startBlock) public onlyOwner {
+    function updateStartBlock(uint256 _startBlock) external onlyOwner {
         require(block.number < startBlock, "Staking was started already");
         require(block.number < _startBlock);
         

@@ -1,11 +1,11 @@
-pragma solidity 0.6.12;
+pragma solidity ^0.8.0;
 // SPDX-License-Identifier: MIT
 
 import '@pancakeswap/pancake-swap-lib/contracts/math/SafeMath.sol';
 import '@pancakeswap/pancake-swap-lib/contracts/token/BEP20/IBEP20.sol';
-import '@pancakeswap/pancake-swap-lib/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract ArtichainEscrow is Ownable {
+contract ArtichainEscrow is OwnableUpgradeable {
     using SafeMath for uint256;
 
     address public wallet;
@@ -59,14 +59,17 @@ contract ArtichainEscrow is Ownable {
     event PaymentRejected(address indexed buyer, uint256 orderId);
     event DisputeResolved(uint256 orderId);
     
-    constructor(IBEP20 _token, address _wallet, uint256 _depositFee, uint256 _withdrawFee) public {
+    function initialize(IBEP20 _token, address _wallet, uint256 _depositFee, uint256 _withdrawFee) public initializer {
+        __Ownable_init();
+
         token = _token;
         wallet = _wallet;
         depositFee = _depositFee;
         withdrawFee = _withdrawFee;
         allowReleaseRequest = false;
     }
-        
+    function _authorizeUpgrade(address newImplementation) internal {}
+    
     function deposit(uint256 _amount) external {
         require(_amount > 0, "Invalid amount");
         require(token.transferFrom(msg.sender, address(this), _amount));
