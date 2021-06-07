@@ -32,7 +32,6 @@ contract ArtichainEscrow is Ownable {
     mapping(address => uint256) public lockedBalances;
 
     uint256 orderIndex;
-    uint256 orderIndex;
     mapping(uint256 => Payment) public personalPayments;
     mapping(uint256 => Payment) public professionalPayments;
 
@@ -106,7 +105,7 @@ contract ArtichainEscrow is Ownable {
         require(_delay > 0, "delay should be greater than 0");
         require(_seller != address(0), "Invalid Address");
 
-        uint256 _releaseTime = now + _delay * 1 days;
+        uint256 _releaseTime = block.timestamp + _delay * 1 days;
         uint256 _orderId = orderIndex.add(1);
 
         PaymenentType paymentType = PaymenentType.PersonalPayment;
@@ -134,7 +133,7 @@ contract ArtichainEscrow is Ownable {
 
         Payment memory _payment = professionalPayments[_orderId];
         require(msg.sender == _payment.buyer || msg.sender == _payment.seller, "Permission denied");
-        require(_payment.status == PaymentStatus.Pending || _payment.releaseTime < now, "Payment can not be disputed");
+        require(_payment.status == PaymentStatus.Pending || _payment.releaseTime < block.timestamp, "Payment can not be disputed");
 
         professionalPayments[_orderId].status = PaymentStatus.Disputed;
         lockedBalances[_payment.buyer] = lockedBalances[_payment.buyer].sub(_payment.amount);
@@ -178,11 +177,11 @@ contract ArtichainEscrow is Ownable {
         if(_paymentType == 0) {
             require(personalPayments[_orderId].buyer == msg.sender, "Permission denied");
             require(personalPayments[_orderId].status == PaymentStatus.Pending, "Payment can not be released");
-            // require(personalPayments[_orderId].releaseTime < now, "Payment can not be released");
+            // require(personalPayments[_orderId].releaseTime < block.timestamp, "Payment can not be released");
         } else {
             require(professionalPayments[_orderId].buyer == msg.sender, "Permission denied");
             require(professionalPayments[_orderId].status == PaymentStatus.Pending, "Payment can not be released");
-            // require(professionalPayments[_orderId].releaseTime < now, "Payment can not be released");
+            // require(professionalPayments[_orderId].releaseTime < block.timestamp, "Payment can not be released");
         }
 
         _paymentRelease(_orderId, _paymentType);
@@ -195,11 +194,11 @@ contract ArtichainEscrow is Ownable {
         if(_paymentType == 0) {
             require(personalPayments[_orderId].seller == msg.sender || msg.sender == owner(), "Permission denied");
             require(personalPayments[_orderId].status == PaymentStatus.Pending, "Payment can not be released");
-            require(personalPayments[_orderId].releaseTime < now, "Payment can not be released");
+            require(personalPayments[_orderId].releaseTime < block.timestamp, "Payment can not be released");
         } else {
             require(professionalPayments[_orderId].seller == msg.sender || msg.sender == owner(), "Permission denied");
             require(professionalPayments[_orderId].status == PaymentStatus.Pending, "Payment can not be released");
-            require(professionalPayments[_orderId].releaseTime < now, "Payment can not be released");
+            require(professionalPayments[_orderId].releaseTime < block.timestamp, "Payment can not be released");
         }
 
         _paymentRelease(_orderId, _paymentType);
@@ -210,10 +209,10 @@ contract ArtichainEscrow is Ownable {
             Payment memory _payment = personalPayments[_orderId];
 
             lockedBalances[_payment.buyer] = lockedBalances[_payment.buyer].sub(_payment.amount);
-            lockedPayments[_payment.seller].push(LockedPayment(PaymenentType.PersonalPayment, PaymentStatus.Pending, _orderId, _payment.buyer, _payment.amount, _payment.code, now));
+            lockedPayments[_payment.seller].push(LockedPayment(PaymenentType.PersonalPayment, PaymentStatus.Pending, _orderId, _payment.buyer, _payment.amount, _payment.code, block.timestamp));
 
             emit PaymentReleased(0, _payment.seller, _orderId, _payment.amount);
-            emit Paymentlocked(_orderId, 0, _payment.seller, _payment.buyer, _payment.amount, now, _payment.code);
+            emit Paymentlocked(_orderId, 0, _payment.seller, _payment.buyer, _payment.amount, block.timestamp, _payment.code);
 
             if(_payment.isRecursive) {
                 if(balances[_payment.buyer] < _payment.amount) {
@@ -223,7 +222,7 @@ contract ArtichainEscrow is Ownable {
                 } else {
                     balances[_payment.buyer] = balances[_payment.buyer].sub(_payment.amount);
                     lockedBalances[_payment.buyer] = lockedBalances[_payment.buyer].add(_payment.amount);
-                    personalPayments[_orderId].releaseTime = now + _payment.delay * 1 days;
+                    personalPayments[_orderId].releaseTime = block.timestamp + _payment.delay * 1 days;
                 }
             } else {
                 personalPayments[_orderId].status = PaymentStatus.Completed;
@@ -233,10 +232,10 @@ contract ArtichainEscrow is Ownable {
 
             professionalPayments[_orderId].status = PaymentStatus.Completed;
             lockedBalances[_payment.buyer] = lockedBalances[_payment.buyer].sub(_payment.amount);
-            lockedPayments[_payment.seller].push(LockedPayment(PaymenentType.ProfessionalPayment, PaymentStatus.Pending, _orderId, _payment.buyer, _payment.amount, _payment.code, now));
+            lockedPayments[_payment.seller].push(LockedPayment(PaymenentType.ProfessionalPayment, PaymentStatus.Pending, _orderId, _payment.buyer, _payment.amount, _payment.code, block.timestamp));
 
             emit PaymentReleased(1, _payment.seller, _orderId, _payment.amount);
-            emit Paymentlocked(_orderId, 1, _payment.seller, _payment.buyer, _payment.amount, now, _payment.code);
+            emit Paymentlocked(_orderId, 1, _payment.seller, _payment.buyer, _payment.amount, block.timestamp, _payment.code);
         }
     }
 

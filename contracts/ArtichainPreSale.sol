@@ -18,6 +18,7 @@ import './ArtichainToken.sol';
  * The internal interface conforms the extensible and modifiable surface of Presales. Override
  * the methods to add functionality. Consider using 'super' where appropiate to concatenate
  * behavior.
+ * start time (11 june 2021 14:00 UTC - 8,192,324 block)
  */
 contract ArtichainPresale is Ownable {
     using SafeMath for uint256;
