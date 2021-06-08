@@ -235,7 +235,7 @@ contract ArtichainPresale is Ownable {
         return true;
     }
 
-    function updateCompanyWallet(address _wallet) external onlyWhileOpen onlyOwner returns (bool){
+    function updateCompanyWallet(address _wallet) external onlyOwner returns (bool){
         wallet = _wallet;
         return true;
     }
