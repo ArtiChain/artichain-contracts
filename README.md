@@ -1,4 +1,4 @@
-# Artichain Farming 🥞
+# Artichain Farming
 
 [![Actions Status](https://github.com/ArtiChain/artichain-contracts/workflows/CI/badge.svg)](https://github.com/ArtiChain/artichain-contracts/actions)
 [![codecov](https://codecov.io/gh/ArtiChain/artichain-contracts/branch/master/graph/badge.svg?token=47TCN0KLMZ)](https://codecov.io/gh/ArtiChain/artichain-contracts)
